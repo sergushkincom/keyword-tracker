@@ -1,13 +1,13 @@
-import { Bell, ChevronDown, Moon, Search, Sun } from 'lucide-react'
+import { Bell, ChevronDown, Search } from 'lucide-react'
 import { iconStroke } from '../lib/cn.ts'
+import { ThemeToggle, type ThemeName } from './ThemeToggle.tsx'
 
 type TopBarProps = {
-  theme: 'light' | 'dark'
+  theme: ThemeName
   onToggleTheme: () => void
 }
 
 export function TopBar({ theme, onToggleTheme }: TopBarProps) {
-  const next = theme === 'light' ? 'dark' : 'light'
   return (
     <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border-primary bg-bg-primary px-3">
       <div className="relative w-80">
@@ -18,14 +18,7 @@ export function TopBar({ theme, onToggleTheme }: TopBarProps) {
         </span>
       </div>
       <div className="ml-auto flex items-center gap-2">
-        <button
-          type="button"
-          className="flex h-8 w-8 items-center justify-center rounded-control border border-border-input text-fg-secondary"
-          aria-label={`Switch to ${next} theme`}
-          onClick={onToggleTheme}
-        >
-          {theme === 'light' ? <Moon size={16} strokeWidth={iconStroke} /> : <Sun size={16} strokeWidth={iconStroke} />}
-        </button>
+        <ThemeToggle theme={theme} onToggle={onToggleTheme} />
         <div className="flex h-8 w-8 items-center justify-center text-fg-secondary" aria-hidden="true">
           <Bell size={16} strokeWidth={iconStroke} />
         </div>
