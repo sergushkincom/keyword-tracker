@@ -11,6 +11,9 @@ npm run dev
 
 ## Design
 
+**Live demo:** https://denys-keyword-tracker.vercel.app
+**Design case study:** [Dribbble — Keyword Tracker](https://dribbble.com/shots/27680234-Design-Case-Study-4-Keyword-Tracker)
+
 Merged runs join consecutive days with the same rank into one cell, so a long flat run reads as stability and a row of narrow cells reads as volatility.
 
 Rank is drawn on a single-hue ramp from light to dark, because rank is an ordered quantity. A traffic-light ramp is in the code behind a constant if you want to compare.
