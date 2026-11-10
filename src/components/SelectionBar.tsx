@@ -23,7 +23,7 @@ export function SelectionBar({ count, onSelectAll, onDeselectAll }: SelectionBar
   if (count === 0) return null
   const noun = count === 1 ? 'keyword' : 'keywords'
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-40 flex justify-center">
+    <div className="pointer-events-none fixed inset-x-0 bottom-12 z-40 flex justify-center">
       <div className="selection-in pointer-events-auto flex items-center gap-3 rounded-card bg-bg-dark px-3 py-2 text-fg-white-inverse shadow-overlay">
         <span>
           {count} {noun} selected

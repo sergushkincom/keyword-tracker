@@ -4,6 +4,7 @@ import { IconRail } from './components/IconRail.tsx'
 import { NewEventDrawer } from './components/NewEventDrawer.tsx'
 import { ProductCard } from './components/ProductCard.tsx'
 import { SelectionBar } from './components/SelectionBar.tsx'
+import { SiteFooter } from './components/SiteFooter.tsx'
 import { TableToolbar } from './components/TableToolbar.tsx'
 import { TopBar } from './components/TopBar.tsx'
 import { TrackerTable } from './components/TrackerTable.tsx'
@@ -82,26 +83,29 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-bg-body text-fg-primary">
-      <IconRail />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <TopBar theme={theme} onToggleTheme={() => setTheme((current) => (current === 'light' ? 'dark' : 'light'))} />
-        <main className="flex min-h-0 flex-1 flex-col gap-2 px-2 py-2">
-          <FilterRow />
-          <ProductCard />
-          <TableToolbar drawerOpen={drawerOpen} onNewEvent={openDrawer} />
-          <TrackerTable
-            events={events}
-            drawerOpen={drawerOpen}
-            span={drawerOpen ? span : null}
-            onSpanChange={setSpan}
-            selected={selected}
-            onToggleSelected={toggleSelected}
-            enteredId={enteredId}
-            onEntered={() => setEnteredId(null)}
-          />
-        </main>
+    <div className="flex h-screen flex-col overflow-hidden bg-bg-body text-fg-primary">
+      <div className="flex min-h-0 flex-1">
+        <IconRail />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <TopBar theme={theme} onToggleTheme={() => setTheme((current) => (current === 'light' ? 'dark' : 'light'))} />
+          <main className="flex min-h-0 flex-1 flex-col gap-2 px-2 py-2">
+            <FilterRow />
+            <ProductCard />
+            <TableToolbar drawerOpen={drawerOpen} onNewEvent={openDrawer} />
+            <TrackerTable
+              events={events}
+              drawerOpen={drawerOpen}
+              span={drawerOpen ? span : null}
+              onSpanChange={setSpan}
+              selected={selected}
+              onToggleSelected={toggleSelected}
+              enteredId={enteredId}
+              onEntered={() => setEnteredId(null)}
+            />
+          </main>
+        </div>
       </div>
+      <SiteFooter />
       {drawerOpen ? <NewEventDrawer key={drawerKey} span={span} onClose={closeDrawer} onCreate={createEvent} /> : null}
       <SelectionBar
         count={selected.size}
