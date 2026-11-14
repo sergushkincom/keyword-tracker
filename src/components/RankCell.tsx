@@ -1,3 +1,4 @@
+import { spanHeaderIds, spanRelation, spokenSpan } from '../lib/dates.ts'
 import { rankColor, rankText } from '../lib/rankColor.ts'
 import { COLUMN_WASH, washFrame, type Span } from '../lib/highlight.ts'
 import type { Run } from '../lib/runs.ts'
@@ -24,13 +25,22 @@ type SeriesCellsProps = {
   runs: Run[]
   span: Span | null
   colorize: boolean
+  rowHeaderId: string
   suffix?: string
   collapseLeft?: number
   collapseRight?: number
   animate?: boolean
 }
 
-export function SeriesCells({ runs, span, colorize, suffix, collapseLeft, collapseRight, animate }: SeriesCellsProps) {
+function seriesLabel(run: Run, colorize: boolean, suffix?: string): string {
+  const when = spokenSpan(run.startIndex, run.length)
+  const relation = spanRelation(run.length)
+  if (run.value === null) return `${colorize ? 'No rank' : 'No value'} ${relation} ${when}`
+  const value = formatValue(run.value, suffix)
+  return colorize ? `Rank ${value} ${relation} ${when}` : `${value} ${relation} ${when}`
+}
+
+export function SeriesCells({ runs, span, colorize, rowHeaderId, suffix, collapseLeft, collapseRight, animate }: SeriesCellsProps) {
   return (
     <>
       {runs.map((run) => {
@@ -42,10 +52,12 @@ export function SeriesCells({ runs, span, colorize, suffix, collapseLeft, collap
               : null
         const fill =
           run.value === null ? 'hatch' : colorize ? rankColor(run.value) : 'bg-bg-secondary text-fg-primary'
+        const value = run.value === null ? '' : formatValue(run.value, suffix)
         return (
           <td
             key={run.startIndex}
             colSpan={run.length}
+            headers={spanHeaderIds(rowHeaderId, run.startIndex, run.length)}
             data-rank={run.value ?? ''}
             className={cn(
               'relative h-9 border-b border-border-primary p-1',
@@ -53,16 +65,18 @@ export function SeriesCells({ runs, span, colorize, suffix, collapseLeft, collap
               collapse === 'right' && 'collapse-right',
             )}
           >
-            <div className={cn('absolute inset-1 rounded-chip', fill, animate && 'rise-in')} />
+            <span className="sr-only">{seriesLabel(run, colorize, suffix)}</span>
+            <div aria-hidden="true" className={cn('absolute inset-1 rounded-chip', fill, animate && 'rise-in')} />
             <Wash startIndex={run.startIndex} length={run.length} span={span} />
             <div
+              aria-hidden="true"
               className={cn(
                 'relative z-[2] flex h-full items-center justify-center tabular-nums',
                 run.value !== null && (colorize ? rankText(run.value) : 'text-fg-primary'),
                 animate && 'rise-in',
               )}
             >
-              {run.value === null ? '' : formatValue(run.value, suffix)}
+              {value}
             </div>
           </td>
         )

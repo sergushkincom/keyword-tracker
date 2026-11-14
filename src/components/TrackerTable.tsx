@@ -1,11 +1,11 @@
 import { ArrowDown, ChevronRight } from 'lucide-react'
-import { useLayoutEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
+import { useLayoutEffect, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react'
 import { KEYWORDS } from '../data/keywords.ts'
 import type { TrackerEvent } from '../data/events.ts'
-import { DISPLAY_AXIS } from '../lib/dates.ts'
+import { AXIS, DISPLAY_AXIS, columnHeaderId, spokenRange, weekdayLong, spokenDay } from '../lib/dates.ts'
 import { CHECK_W, DATE_ORIGIN, DAY_COUNT, DAY_W, LABEL_W, NAME_W, RANK_W, TABLE_WIDTH, stickyClass } from '../lib/columns.ts'
 import { COLUMN_WASH, type Span } from '../lib/highlight.ts'
-import { cn, iconStroke } from '../lib/cn.ts'
+import { cn, focusRing, iconStroke } from '../lib/cn.ts'
 import { EventRow } from './EventRow.tsx'
 import { KeywordRow } from './KeywordRow.tsx'
 import { Legend } from './Legend.tsx'
@@ -47,7 +47,10 @@ export function TrackerTable({
   const [eventsOpen, setEventsOpen] = useState(true)
   const [keywordsOpen, setKeywordsOpen] = useState(true)
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set())
+  const [dateFocus, setDateFocus] = useState(0)
+  const anchorRef = useRef<number | null>(null)
   const headerSticky = { scrolled, header: true, tone: 'secondary' as const }
+  const captionRange = spokenRange(AXIS[0]?.iso ?? '', AXIS[AXIS.length - 1]?.iso ?? '')
 
   useLayoutEffect(() => {
     const element = scrollerRef.current
@@ -67,9 +70,18 @@ export function TrackerTable({
     return Math.min(DAY_COUNT - 1, Math.max(0, raw))
   }
 
+  function focusDate(index: number) {
+    const day = DISPLAY_AXIS[index]
+    if (!day) return
+    setDateFocus(index)
+    scrollerRef.current?.querySelector<HTMLElement>(`#${columnHeaderId(day.iso)}`)?.focus()
+  }
+
   function onHeaderPointerDown(event: ReactPointerEvent<HTMLTableCellElement>, index: number) {
     if (!drawerOpen) return
     event.preventDefault()
+    anchorRef.current = index
+    setDateFocus(index)
     onSpanChange({ start: index, end: index })
     const move = (pointer: PointerEvent) => {
       const next = indexFromClientX(pointer.clientX)
@@ -81,6 +93,30 @@ export function TrackerTable({
     }
     window.addEventListener('pointermove', move)
     window.addEventListener('pointerup', up)
+  }
+
+  function onHeaderKeyDown(event: ReactKeyboardEvent<HTMLTableCellElement>, index: number) {
+    if (!drawerOpen) return
+    const key = event.key
+    if (key === 'Enter' || key === ' ') {
+      event.preventDefault()
+      anchorRef.current = index
+      onSpanChange({ start: index, end: index })
+      return
+    }
+    const delta = key === 'ArrowRight' ? 1 : key === 'ArrowLeft' ? -1 : null
+    let next: number | null = null
+    if (delta !== null) next = Math.min(DAY_COUNT - 1, Math.max(0, index + delta))
+    else if (key === 'Home') next = 0
+    else if (key === 'End') next = DAY_COUNT - 1
+    if (next === null) return
+    event.preventDefault()
+    if (event.shiftKey) {
+      const anchor = anchorRef.current ?? index
+      anchorRef.current = anchor
+      onSpanChange({ start: Math.min(anchor, next), end: Math.max(anchor, next) })
+    }
+    focusDate(next)
   }
 
   function toggleExpanded(id: string) {
@@ -98,7 +134,16 @@ export function TrackerTable({
       className="min-h-0 flex-1 overflow-auto rounded-card border border-border-primary bg-bg-primary"
       onScroll={(event) => setScrolled(event.currentTarget.scrollLeft > 0)}
     >
-      <table className="border-separate border-spacing-0 text-cell" style={{ width: TABLE_WIDTH, minWidth: TABLE_WIDTH }}>
+      {drawerOpen ? (
+        <p id="timeline-keys" className="sr-only">
+          When creating an event, arrow keys move between days, Enter selects a day, and Shift plus arrow keys extends the range.
+        </p>
+      ) : null}
+      <table
+        aria-label={`Keyword ranks from ${captionRange} 2026`}
+        className="border-separate border-spacing-0 text-cell"
+        style={{ width: TABLE_WIDTH, minWidth: TABLE_WIDTH }}
+      >
         <colgroup>
           <col style={{ width: CHECK_W }} />
           <col style={{ width: NAME_W }} />
@@ -110,17 +155,19 @@ export function TrackerTable({
         </colgroup>
         <thead>
           <tr>
-            <th className={cn(stickyClass(0, headerSticky), 'border-b border-border-primary')} />
-            <th className={cn(stickyClass(1, headerSticky), 'border-b border-border-primary px-2 text-left font-normal text-fg-secondary')}>
+            <th scope="col" className={cn(stickyClass(0, headerSticky), 'border-b border-border-primary')}>
+              <span className="sr-only">Select</span>
+            </th>
+            <th scope="col" className={cn(stickyClass(1, headerSticky), 'border-b border-border-primary px-2 text-left font-normal text-fg-secondary')}>
               Events
             </th>
-            <th className={cn(stickyClass(2, headerSticky), 'border-b border-border-primary px-2 text-left font-normal text-fg-secondary')}>
+            <th scope="col" className={cn(stickyClass(2, headerSticky), 'border-b border-border-primary px-2 text-left font-normal text-fg-secondary')}>
               Label
             </th>
-            <th className={cn(stickyClass(3, headerSticky), 'border-b border-border-primary px-2 text-right font-normal text-fg-secondary')}>
+            <th scope="col" className={cn(stickyClass(3, headerSticky), 'border-b border-border-primary px-2 text-right font-normal text-fg-secondary')}>
               <span className="inline-flex items-center gap-1">
                 Av.Rank
-                <ArrowDown size={16} strokeWidth={iconStroke} className="text-fg-tertiary" />
+                <ArrowDown aria-hidden size={16} strokeWidth={iconStroke} className="text-fg-tertiary" />
               </span>
             </th>
             {DISPLAY_AXIS.map((day, index) => {
@@ -128,9 +175,16 @@ export function TrackerTable({
               return (
                 <th
                   key={day.iso}
+                  id={columnHeaderId(day.iso)}
+                  scope="col"
                   data-date={day.iso}
+                  aria-label={`${weekdayLong(day.weekday)}, ${spokenDay(day.iso)}`}
+                  aria-selected={drawerOpen && selectedColumn ? true : undefined}
+                  aria-describedby={drawerOpen ? 'timeline-keys' : undefined}
+                  tabIndex={drawerOpen ? (index === dateFocus ? 0 : -1) : undefined}
                   className={cn(
                     'sticky top-0 z-20 border-b border-border-primary bg-bg-secondary py-1 text-center font-normal',
+                    focusRing,
                     drawerOpen && 'cursor-crosshair',
                     day.isToday && 'text-fg-brand-primary',
                     day.isWeekend && !day.isToday && 'text-fg-quaternary',
@@ -138,6 +192,8 @@ export function TrackerTable({
                   )}
                   style={selectedColumn ? { background: 'var(--bg-brand-tertiary)' } : undefined}
                   onPointerDown={(event) => onHeaderPointerDown(event, index)}
+                  onKeyDown={(event) => onHeaderKeyDown(event, index)}
+                  onFocus={() => setDateFocus(index)}
                 >
                   <span className="block leading-4">{day.weekday}</span>
                   <span className="block leading-4 tabular-nums">{day.day}</span>
@@ -158,6 +214,7 @@ export function TrackerTable({
             ? events.map((event) => (
                 <EventRow
                   key={event.id}
+                  rowId={event.id}
                   name={event.name}
                   label={event.label}
                   color={event.color}
@@ -170,6 +227,8 @@ export function TrackerTable({
                 />
               ))
             : null}
+        </tbody>
+        <tbody>
           <tr>
             <td colSpan={4 + DAY_COUNT} className="border-b border-border-primary bg-bg-primary p-1" style={legendBackground(span)}>
               <div className="sticky left-0 flex justify-end" style={{ width: viewportWidth || undefined }}>
@@ -177,6 +236,8 @@ export function TrackerTable({
               </div>
             </td>
           </tr>
+        </tbody>
+        <tbody>
           <GroupHeader
             label={`Keywords (${KEYWORDS.length})`}
             open={keywordsOpen}
@@ -221,12 +282,12 @@ function GroupHeader({
   return (
     <tr>
       <td className={cn(stickyClass(0, sticky), 'h-9 border-b border-border-primary bg-bg-secondary')} />
-      <td className={cn(stickyClass(1, sticky), 'h-9 border-b border-border-primary')}>
-        <button type="button" className="flex h-full items-center gap-1 px-2 text-fg-secondary" aria-expanded={open} onClick={onToggle}>
-          <ChevronRight size={16} strokeWidth={iconStroke} className={open ? 'rotate-90' : undefined} />
+      <th scope="rowgroup" className={cn(stickyClass(1, sticky), 'h-9 border-b border-border-primary text-left font-normal')}>
+        <button type="button" className={cn('flex h-full items-center gap-1 px-2 text-fg-secondary', focusRing)} aria-expanded={open} onClick={onToggle}>
+          <ChevronRight aria-hidden size={16} strokeWidth={iconStroke} className={open ? 'rotate-90' : undefined} />
           {label}
         </button>
-      </td>
+      </th>
       <td className={cn(stickyClass(2, sticky), 'h-9 border-b border-border-primary')} />
       <td className={cn(stickyClass(3, sticky), 'h-9 border-b border-border-primary')} />
       {DISPLAY_AXIS.map((day, index) => (

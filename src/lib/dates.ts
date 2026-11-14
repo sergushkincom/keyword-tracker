@@ -45,6 +45,66 @@ export function formatRange(startIso: string, endIso: string): string {
   return `${formatDay(start)} – ${formatDay(end)}`
 }
 
+const WEEKDAY_LONG: Record<(typeof WEEKDAYS)[number], string> = {
+  Sun: 'Sunday',
+  Mon: 'Monday',
+  Tue: 'Tuesday',
+  Wed: 'Wednesday',
+  Thu: 'Thursday',
+  Fri: 'Friday',
+  Sat: 'Saturday',
+}
+
+export function weekdayLong(weekday: (typeof WEEKDAYS)[number]): string {
+  return WEEKDAY_LONG[weekday]
+}
+
+/** Column header id for one day. Shared by header cells and `headers` on spanned cells. */
+export function columnHeaderId(iso: string): string {
+  return `col-${iso}`
+}
+
+/** Screen-reader day, day then month: "5 Nov". */
+export function spokenDay(iso: string): string {
+  const date = new Date(`${iso}T00:00:00Z`)
+  return `${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]}`
+}
+
+/**
+ * Chronological spoken range. One day is "5 Nov"; a same-month run is "2 to 5 Nov".
+ * Display order is newest-first, so callers pass the two ends in either order.
+ */
+export function spokenRange(startIso: string, endIso: string): string {
+  const [start, end] = startIso <= endIso ? [startIso, endIso] : [endIso, startIso]
+  if (start === end) return spokenDay(start)
+  const from = new Date(`${start}T00:00:00Z`)
+  const to = new Date(`${end}T00:00:00Z`)
+  const sameMonth = from.getUTCFullYear() === to.getUTCFullYear() && from.getUTCMonth() === to.getUTCMonth()
+  if (sameMonth) return `${from.getUTCDate()} to ${to.getUTCDate()} ${MONTHS[from.getUTCMonth()]}`
+  return `${spokenDay(start)} to ${spokenDay(end)}`
+}
+
+export function spokenSpan(startIndex: number, length: number): string {
+  const left = DISPLAY_AXIS[startIndex]
+  const right = DISPLAY_AXIS[startIndex + length - 1]
+  if (!left || !right) return ''
+  return spokenRange(left.iso, right.iso)
+}
+
+/** `on` for one day, `from` for a run: "Rank 3 on 5 Nov" / "Rank 3 from 2 to 5 Nov". */
+export function spanRelation(length: number): 'on' | 'from' {
+  return length === 1 ? 'on' : 'from'
+}
+
+export function spanHeaderIds(rowHeaderId: string, startIndex: number, length: number): string {
+  const ids = [rowHeaderId]
+  for (let offset = 0; offset < length; offset += 1) {
+    const day = DISPLAY_AXIS[startIndex + offset]
+    if (day) ids.push(columnHeaderId(day.iso))
+  }
+  return ids.join(' ')
+}
+
 export type DateSegment =
   | { kind: 'empty'; startIndex: number; length: number }
   | { kind: 'bar'; startIndex: number; length: number }

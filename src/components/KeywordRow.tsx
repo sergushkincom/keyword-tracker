@@ -4,7 +4,7 @@ import { displayIndex } from '../lib/dates.ts'
 import { stickyClass } from '../lib/columns.ts'
 import type { Span } from '../lib/highlight.ts'
 import { displayOrder, toRuns } from '../lib/runs.ts'
-import { cn, iconStroke } from '../lib/cn.ts'
+import { cn, focusRing, iconStroke } from '../lib/cn.ts'
 import { EventRow } from './EventRow.tsx'
 import { SeriesCells } from './RankCell.tsx'
 
@@ -44,31 +44,36 @@ export function KeywordRow({ keyword, selected, expanded, scrolled, span, onTogg
               aria-label={`Select ${keyword.name}`}
               className={cn(
                 'flex h-4 w-4 items-center justify-center rounded-chip border',
+                focusRing,
                 selected ? 'border-border-brand-primary bg-bg-brand-primary text-fg-on-brand' : 'border-border-input bg-bg-input',
               )}
               onClick={() => onToggleSelected(keyword.id)}
             >
-              {selected ? <Check size={12} strokeWidth={iconStroke} /> : null}
+              {selected ? <Check aria-hidden size={12} strokeWidth={iconStroke} /> : null}
             </button>
           </div>
         </td>
-        <td className={cn(stickyClass(1, sticky), 'h-9 overflow-hidden border-b border-border-primary')}>
+        <th
+          id={`row-${keyword.id}`}
+          scope="row"
+          className={cn(stickyClass(1, sticky), 'h-9 overflow-hidden border-b border-border-primary text-left font-normal')}
+        >
           <div className="flex h-full items-center gap-1 px-2">
             {expandable ? (
               <button
                 type="button"
-                className="flex h-4 w-4 items-center justify-center text-fg-tertiary"
+                className={cn('flex h-4 w-4 items-center justify-center text-fg-tertiary', focusRing)}
                 aria-expanded={expanded}
                 aria-label={`${expanded ? 'Collapse' : 'Expand'} ${keyword.name}`}
                 onClick={() => onToggleExpanded(keyword.id)}
               >
-                <ChevronRight size={16} strokeWidth={iconStroke} className={expanded ? 'rotate-90' : undefined} />
+                <ChevronRight aria-hidden size={16} strokeWidth={iconStroke} className={expanded ? 'rotate-90' : undefined} />
               </button>
             ) : null}
-            {expandable ? <Pin size={16} strokeWidth={iconStroke} className="shrink-0 text-fg-tertiary" /> : null}
+            {expandable ? <Pin aria-hidden size={16} strokeWidth={iconStroke} className="shrink-0 text-fg-tertiary" /> : null}
             <span className="truncate">{keyword.name}</span>
           </div>
-        </td>
+        </th>
         <td className={cn(stickyClass(2, sticky), 'h-9 border-b border-border-primary px-2')}>
           <div className="flex items-center gap-1">
             {shown.map((label) => (
@@ -84,6 +89,7 @@ export function KeywordRow({ keyword, selected, expanded, scrolled, span, onTogg
           runs={runs}
           span={span}
           colorize
+          rowHeaderId={`row-${keyword.id}`}
           collapseLeft={keyword.id === 'shampoo' ? COLLAPSE_LEFT : undefined}
           collapseRight={keyword.id === 'shampoo' ? COLLAPSE_RIGHT : undefined}
         />
@@ -93,6 +99,7 @@ export function KeywordRow({ keyword, selected, expanded, scrolled, span, onTogg
             child.kind === 'bar' ? (
               <EventRow
                 key={child.id}
+                rowId={child.id}
                 name={child.name}
                 label={child.label}
                 color={child.color}
@@ -106,16 +113,26 @@ export function KeywordRow({ keyword, selected, expanded, scrolled, span, onTogg
             ) : (
               <tr key={child.id} data-subrow={child.id}>
                 <td className={cn(stickyClass(0, sticky), 'h-9 border-b border-border-primary')} />
-                <td className={cn(stickyClass(1, sticky), 'h-9 overflow-hidden border-b border-border-primary')}>
+                <th
+                  id={`row-${child.id}`}
+                  scope="row"
+                  className={cn(stickyClass(1, sticky), 'h-9 overflow-hidden border-b border-border-primary text-left font-normal')}
+                >
                   <div className="flex h-full items-center px-2 pl-8">
                     <span className="truncate">{child.name}</span>
                   </div>
-                </td>
+                </th>
                 <td className={cn(stickyClass(2, sticky), 'h-9 border-b border-border-primary px-2')}>
                   <Chip>{child.chip}</Chip>
                 </td>
                 <td className={cn(stickyClass(3, sticky), 'h-9 border-b border-border-primary')} />
-                <SeriesCells runs={toRuns(displayOrder(child.values))} span={span} colorize={false} suffix={child.suffix} />
+                <SeriesCells
+                  runs={toRuns(displayOrder(child.values))}
+                  span={span}
+                  colorize={false}
+                  rowHeaderId={`row-${child.id}`}
+                  suffix={child.suffix}
+                />
               </tr>
             ),
           )

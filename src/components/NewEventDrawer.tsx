@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { EVENT_COLORS, type EventColor } from '../data/events.ts'
-import { DISPLAY_AXIS, formatRange } from '../lib/dates.ts'
+import { DISPLAY_AXIS, columnHeaderId, formatRange } from '../lib/dates.ts'
 import type { Span } from '../lib/highlight.ts'
-import { cn } from '../lib/cn.ts'
+import { cn, focusRing } from '../lib/cn.ts'
 
 type NewEventDrawerProps = {
   span: Span | null
@@ -74,9 +74,21 @@ export function NewEventDrawer({ span, onClose, onCreate }: NewEventDrawerProps)
         </fieldset>
         <div className="flex flex-col gap-1 text-cell text-fg-secondary">
           Date range
-          <div id="event-range" className="flex h-8 items-center rounded-control border border-border-input bg-bg-input px-2 text-fg-primary">
+          <button
+            type="button"
+            id="event-range"
+            className={cn(
+              'flex h-8 w-full items-center rounded-control border border-border-input bg-bg-input px-2 text-left text-fg-primary',
+              focusRing,
+            )}
+            aria-describedby="timeline-keys"
+            onClick={() => {
+              const day = span ? DISPLAY_AXIS[span.start] : DISPLAY_AXIS[0]
+              if (day) document.getElementById(columnHeaderId(day.iso))?.focus()
+            }}
+          >
             {range}
-          </div>
+          </button>
         </div>
         <div className="mt-auto flex justify-end gap-2">
           <button type="button" className="h-8 rounded-control border border-border-primary bg-bg-primary px-3 text-fg-primary hover:bg-bg-primary-hover" onClick={onClose}>
