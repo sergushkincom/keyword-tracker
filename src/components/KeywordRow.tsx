@@ -52,7 +52,11 @@ export function KeywordRow({ keyword, selected, expanded, scrolled, span, onTogg
             </button>
           </div>
         </td>
-        <td className={cn(stickyClass(1, sticky), 'h-9 overflow-hidden border-b border-border-primary')}>
+        <th
+          scope="row"
+          aria-labelledby={`${keyword.id}-name`}
+          className={cn(stickyClass(1, sticky), 'h-9 overflow-hidden border-b border-border-primary text-left font-normal')}
+        >
           <div className="flex h-full items-center gap-1 px-2">
             {expandable ? (
               <button
@@ -66,9 +70,9 @@ export function KeywordRow({ keyword, selected, expanded, scrolled, span, onTogg
               </button>
             ) : null}
             {expandable ? <Pin size={16} strokeWidth={iconStroke} className="shrink-0 text-fg-tertiary" /> : null}
-            <span className="truncate">{keyword.name}</span>
+            <span id={`${keyword.id}-name`} className="truncate">{keyword.name}</span>
           </div>
-        </td>
+        </th>
         <td className={cn(stickyClass(2, sticky), 'h-9 border-b border-border-primary px-2')}>
           <div className="flex items-center gap-1">
             {shown.map((label) => (
@@ -106,11 +110,15 @@ export function KeywordRow({ keyword, selected, expanded, scrolled, span, onTogg
             ) : (
               <tr key={child.id} data-subrow={child.id}>
                 <td className={cn(stickyClass(0, sticky), 'h-9 border-b border-border-primary')} />
-                <td className={cn(stickyClass(1, sticky), 'h-9 overflow-hidden border-b border-border-primary')}>
+                <th
+                  scope="row"
+                  aria-labelledby={`${child.id}-name`}
+                  className={cn(stickyClass(1, sticky), 'h-9 overflow-hidden border-b border-border-primary text-left font-normal')}
+                >
                   <div className="flex h-full items-center px-2 pl-8">
-                    <span className="truncate">{child.name}</span>
+                    <span id={`${child.id}-name`} className="truncate">{child.name}</span>
                   </div>
-                </td>
+                </th>
                 <td className={cn(stickyClass(2, sticky), 'h-9 border-b border-border-primary px-2')}>
                   <Chip>{child.chip}</Chip>
                 </td>

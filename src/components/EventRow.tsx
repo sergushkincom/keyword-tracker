@@ -1,5 +1,6 @@
 import type { EventColor } from '../data/events.ts'
-import { barSegments, formatRange } from '../lib/dates.ts'
+import { barSegments, displaySpan, formatRange } from '../lib/dates.ts'
+import { eventSpanLabel, spanWithDuration } from '../lib/rankLabel.ts'
 import { stickyClass } from '../lib/columns.ts'
 import type { Span } from '../lib/highlight.ts'
 import { cn } from '../lib/cn.ts'
@@ -40,21 +41,23 @@ export function EventRow({
   return (
     <tr data-event={name}>
       <td className={cn(stickyClass(0, sticky), 'h-9 border-b border-border-primary')} />
-      <td className={cn(stickyClass(1, sticky), 'h-9 overflow-hidden border-b border-border-primary')}>
+      <th scope="row" className={cn(stickyClass(1, sticky), 'h-9 overflow-hidden border-b border-border-primary text-left font-normal')}>
         <div className={cn('flex h-full items-center px-2', indent && 'pl-8', animate && 'rise-in')} onAnimationEnd={onAnimated}>
           <span className="truncate">{name}</span>
         </div>
-      </td>
+      </th>
       <td className={cn(stickyClass(2, sticky), 'h-9 border-b border-border-primary px-2')}>
         {chip ? (
           <span className="inline-flex h-5 items-center rounded-chip bg-bg-tertiary px-1 text-cell text-fg-secondary">{chip}</span>
         ) : null}
       </td>
       <td className={cn(stickyClass(3, sticky), 'h-9 border-b border-border-primary')} />
-      {segments.map((segment) =>
-        segment.kind === 'bar' ? (
+      {segments.map((segment) => {
+        const { startIso, endIso } = displaySpan(segment.startIndex, segment.length)
+        return segment.kind === 'bar' ? (
           <td key={segment.startIndex} colSpan={segment.length} className="relative h-9 border-b border-border-primary p-1">
-            <div className={cn('h-full', animate && 'rise-in')}>
+            <span className="sr-only">{eventSpanLabel(name, startIso, endIso, segment.length)}</span>
+            <div aria-hidden="true" className={cn('h-full', animate && 'rise-in')}>
               <EventBar
                 color={color}
                 label={label}
@@ -71,11 +74,12 @@ export function EventRow({
           </td>
         ) : (
           <td key={segment.startIndex} colSpan={segment.length} className="relative h-9 border-b border-border-primary p-1">
-            <div className={cn('hatch absolute inset-1 rounded-chip', animate && 'rise-in')} />
+            <span className="sr-only">{`No event, ${spanWithDuration(startIso, endIso, segment.length)}`}</span>
+            <div aria-hidden="true" className={cn('hatch absolute inset-1 rounded-chip', animate && 'rise-in')} />
             <Wash startIndex={segment.startIndex} length={segment.length} span={span} />
           </td>
-        ),
-      )}
+        )
+      })}
     </tr>
   )
 }
