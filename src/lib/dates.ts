@@ -30,6 +30,15 @@ export const AXIS: DayColumn[] = Array.from({ length: 21 }, (_, index) => dayAt(
 /** Display axis, newest on the left. */
 export const DISPLAY_AXIS: DayColumn[] = [...AXIS].reverse()
 
+/** ISO dates covered by a display-axis cell, chronological order. */
+export function displaySpan(startIndex: number, length: number): { startIso: string; endIso: string } {
+  const start = DISPLAY_AXIS[startIndex]
+  const end = DISPLAY_AXIS[startIndex + Math.max(length, 1) - 1]
+  const startIso = start?.iso ?? ''
+  const endIso = end?.iso ?? startIso
+  return startIso <= endIso ? { startIso, endIso } : { startIso: endIso, endIso: startIso }
+}
+
 export function displayIndex(iso: string): number {
   return DISPLAY_AXIS.findIndex((day) => day.iso === iso)
 }
