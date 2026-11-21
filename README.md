@@ -2,13 +2,13 @@
 
 A clickable front-end prototype of a keyword rank tracker. The table is the chart: days that share a rank join into one cell.
 
-[Try it →](https://keyword-tracker-nine.vercel.app)
+[Try it →](https://denys-keyword-tracker.vercel.app)
 
 **Status:** all data is mocked in TypeScript. There is no backend.
 
-[![The rank table for 4–24 September. Days with the same rank are one cell, so a flat run is a wide block and a jumpy run is a row of narrow cells.](./docs/hero.png)](https://keyword-tracker-nine.vercel.app)
+[![The rank table for 4–24 September. Days with the same rank are one cell, so a flat run is a wide block and a jumpy run is a row of narrow cells.](./docs/hero.png)](https://denys-keyword-tracker.vercel.app)
 
-[![The date field switches from the last 3 weeks to the last 7 days, then the last 2 weeks. The merged cells and the averages follow the window.](./docs/period.gif)](https://keyword-tracker-nine.vercel.app)
+[![The date field switches from the last 3 weeks to the last 7 days, then the last 2 weeks. The merged cells and the averages follow the window.](./docs/period.gif)](https://denys-keyword-tracker.vercel.app)
 
 The still is the default three weeks. The GIF changes that window.
 
@@ -141,4 +141,4 @@ The footer of the app reads "MIT licensed · Clickable prototype" and credits
 
 ## Live demo
 
-Try it at [keyword-tracker-nine.vercel.app](https://keyword-tracker-nine.vercel.app).
+Try it at [denys-keyword-tracker.vercel.app](https://denys-keyword-tracker.vercel.app).

@@ -1,6 +1,6 @@
 # Keyword Tracker — project passport
 
-Keyword Tracker is a clickable front-end prototype of a keyword rank tracker, live at [https://keyword-tracker-nine.vercel.app](https://keyword-tracker-nine.vercel.app).
+Keyword Tracker is a clickable front-end prototype of a keyword rank tracker, live at [https://denys-keyword-tracker.vercel.app](https://denys-keyword-tracker.vercel.app).
 
 **One-line promise:** the table is the chart. Days that share a rank join into one cell, so a flat run reads as a wide block and a jumpy run reads as a row of narrow cells.
 
@@ -52,21 +52,20 @@ npm run build
 
 ## Status
 
-Shipped and live at [https://keyword-tracker-nine.vercel.app](https://keyword-tracker-nine.vercel.app):
+Shipped and live at [https://denys-keyword-tracker.vercel.app](https://denys-keyword-tracker.vercel.app):
 
 - The merged-cell rank table, event bars, and the new-event drawer.
 - Light and dark for this visit.
 - The date field switches the window.
 - README still and GIF of that table.
 - Unit tests and a CI gate for typecheck, lint, test, and the production build.
+- One demo address, denys-keyword-tracker.vercel.app, in the README and the page `<head>`. `vercel.json` sends the old keyword-tracker-nine.vercel.app host there with a permanent redirect.
 
 ## Known gaps
 
 These controls are visible and do not change the keywords, the ranks, or the events: search, the product and location fields, position type, the D and W marks, export, fullscreen, Add → New keyword, the icon rail, and the selection-bar actions other than select and deselect.
 
 The legend popup's timeframe line still reads "Timeframe: 1 week". It does not follow the date field.
-
-The page `<head>` still names a second demo host. The README uses [keyword-tracker-nine.vercel.app](https://keyword-tracker-nine.vercel.app) only. That split is open issue #9.
 
 When the window changes, the rank numbers jump. They do not roll. That idea is open issue #12.
 
