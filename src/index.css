@@ -297,3 +297,18 @@ body {
 .selection-in {
   animation: selection-in 200ms cubic-bezier(.22, 1, .36, 1);
 }
+
+/* Soft slot while a digit is traveling. The resting digit is unmasked. */
+.roll-veil {
+  mask-image: linear-gradient(to bottom, transparent, #000 4px, #000 calc(100% - 4px), transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roll-strip {
+    transition: none;
+  }
+
+  .roll-veil {
+    mask-image: none;
+  }
+}
