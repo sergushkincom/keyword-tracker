@@ -1,6 +1,6 @@
 import { rankColor, rankText } from '../lib/rankColor.ts'
 import { COLUMN_WASH, washFrame, type Span } from '../lib/highlight.ts'
-import { displaySpan } from '../lib/dates.ts'
+import { displaySpan, type DayColumn } from '../lib/dates.ts'
 import { formatSeriesValue, seriesRunLabel } from '../lib/rankLabel.ts'
 import type { Run } from '../lib/runs.ts'
 import { cn } from '../lib/cn.ts'
@@ -20,6 +20,7 @@ export function Wash({ startIndex, length, span }: { startIndex: number; length:
 type SeriesCellsProps = {
   runs: Run[]
   span: Span | null
+  displayAxis: readonly DayColumn[]
   colorize: boolean
   suffix?: string
   collapseLeft?: number
@@ -27,7 +28,16 @@ type SeriesCellsProps = {
   animate?: boolean
 }
 
-export function SeriesCells({ runs, span, colorize, suffix, collapseLeft, collapseRight, animate }: SeriesCellsProps) {
+export function SeriesCells({
+  runs,
+  span,
+  displayAxis,
+  colorize,
+  suffix,
+  collapseLeft,
+  collapseRight,
+  animate,
+}: SeriesCellsProps) {
   return (
     <>
       {runs.map((run) => {
@@ -39,7 +49,7 @@ export function SeriesCells({ runs, span, colorize, suffix, collapseLeft, collap
               : null
         const fill =
           run.value === null ? 'hatch' : colorize ? rankColor(run.value) : 'bg-bg-secondary text-fg-primary'
-        const { startIso, endIso } = displaySpan(run.startIndex, run.length)
+        const { startIso, endIso } = displaySpan(run.startIndex, run.length, displayAxis)
         const label = seriesRunLabel(
           { value: run.value, length: run.length, startIso, endIso },
           { kind: colorize ? 'rank' : 'value', suffix },

@@ -1,6 +1,6 @@
 import { Check, ChevronRight, Pin } from 'lucide-react'
 import { averageRank, type Keyword } from '../data/keywords.ts'
-import { displayIndex } from '../lib/dates.ts'
+import { displayIndex, recentValues, type DayColumn } from '../lib/dates.ts'
 import { stickyClass } from '../lib/columns.ts'
 import type { Span } from '../lib/highlight.ts'
 import { displayOrder, toRuns } from '../lib/runs.ts'
@@ -8,11 +8,9 @@ import { cn, iconStroke } from '../lib/cn.ts'
 import { EventRow } from './EventRow.tsx'
 import { SeriesCells } from './RankCell.tsx'
 
-const COLLAPSE_LEFT = displayIndex('2026-09-21')
-const COLLAPSE_RIGHT = displayIndex('2026-09-20')
-
 type KeywordRowProps = {
   keyword: Keyword
+  displayAxis: readonly DayColumn[]
   selected: boolean
   expanded: boolean
   scrolled: boolean
@@ -25,8 +23,21 @@ function Chip({ children }: { children: string }) {
   return <span className="inline-flex h-5 items-center rounded-chip bg-bg-tertiary px-1 text-cell text-fg-secondary">{children}</span>
 }
 
-export function KeywordRow({ keyword, selected, expanded, scrolled, span, onToggleSelected, onToggleExpanded }: KeywordRowProps) {
-  const runs = toRuns(displayOrder(keyword.ranks))
+export function KeywordRow({
+  keyword,
+  displayAxis,
+  selected,
+  expanded,
+  scrolled,
+  span,
+  onToggleSelected,
+  onToggleExpanded,
+}: KeywordRowProps) {
+  const days = displayAxis.length
+  const ranks = recentValues(keyword.ranks, days)
+  const runs = toRuns(displayOrder(ranks))
+  const collapseLeft = displayIndex('2026-09-21', displayAxis)
+  const collapseRight = displayIndex('2026-09-20', displayAxis)
   const expandable = Boolean(keyword.children?.length)
   const sticky = { scrolled, tone: 'primary' as const }
   const shown = keyword.labels.slice(0, 2)
@@ -82,14 +93,15 @@ export function KeywordRow({ keyword, selected, expanded, scrolled, span, onTogg
           </div>
         </td>
         <td className={cn(stickyClass(3, sticky), 'h-9 border-b border-border-primary px-2 text-right tabular-nums text-fg-primary')}>
-          {averageRank(keyword.ranks)}
+          {averageRank(ranks)}
         </td>
         <SeriesCells
           runs={runs}
           span={span}
+          displayAxis={displayAxis}
           colorize
-          collapseLeft={keyword.id === 'shampoo' ? COLLAPSE_LEFT : undefined}
-          collapseRight={keyword.id === 'shampoo' ? COLLAPSE_RIGHT : undefined}
+          collapseLeft={keyword.id === 'shampoo' && collapseLeft >= 0 ? collapseLeft : undefined}
+          collapseRight={keyword.id === 'shampoo' && collapseRight >= 0 ? collapseRight : undefined}
         />
       </tr>
       {expanded
@@ -100,6 +112,7 @@ export function KeywordRow({ keyword, selected, expanded, scrolled, span, onTogg
                 name={child.name}
                 label={child.label}
                 color={child.color}
+                displayAxis={displayAxis}
                 startDate={child.startDate}
                 endDate={child.endDate}
                 span={span}
@@ -123,7 +136,13 @@ export function KeywordRow({ keyword, selected, expanded, scrolled, span, onTogg
                   <Chip>{child.chip}</Chip>
                 </td>
                 <td className={cn(stickyClass(3, sticky), 'h-9 border-b border-border-primary')} />
-                <SeriesCells runs={toRuns(displayOrder(child.values))} span={span} colorize={false} suffix={child.suffix} />
+                <SeriesCells
+                  runs={toRuns(displayOrder(recentValues(child.values, days)))}
+                  span={span}
+                  displayAxis={displayAxis}
+                  colorize={false}
+                  suffix={child.suffix}
+                />
               </tr>
             ),
           )
