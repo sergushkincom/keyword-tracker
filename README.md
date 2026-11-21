@@ -1,10 +1,16 @@
 # Keyword Tracker
 
-A clickable front-end prototype of a keyword rank tracker.
+A clickable front-end prototype of a keyword rank tracker. The table is the chart: days that share a rank join into one cell.
 
-[Try it →](https://denys-keyword-tracker.vercel.app)
+[Try it →](https://keyword-tracker-nine.vercel.app)
 
 **Status:** all data is mocked in TypeScript. There is no backend.
+
+[![The rank table for 4–24 September. Days with the same rank are one cell, so a flat run is a wide block and a jumpy run is a row of narrow cells.](./docs/hero.png)](https://keyword-tracker-nine.vercel.app)
+
+[![The date field switches from the last 3 weeks to the last 7 days, then the last 2 weeks. The merged cells and the averages follow the window.](./docs/period.gif)](https://keyword-tracker-nine.vercel.app)
+
+The still is the default three weeks. The GIF changes that window.
 
 A product summary and a table of events and keywords for 4–24 September 2026.
 Consecutive days with the same rank join into one cell, so a long flat run reads
@@ -16,6 +22,7 @@ single-hue ramp from light to dark, because rank is an ordered quantity.
 The page shows one product, **Hydrating Cream Cleanser, Fragrance Free, 12 fl oz**,
 with the chips `B0CKIN0001`, Coupon, and Best seller, a current price of $75.00,
 and a 10% discount. The filters read Miami, USA and Last 3w · Sep 4 – Sep 24.
+The date field can switch that window to the last 7 days or the last 2 weeks.
 
 Under that, the table's accessible name is "Keyword ranks and events,
 4 September 2026 to 24 September 2026". The columns are select, Events, Label,
@@ -26,8 +33,8 @@ is marked today in the column header. Weekend headers use
 The seed is ten keywords in `src/data/keywords.ts` and two events in
 `src/data/events.ts`: Prime Day prep (5–11 September) and Price test $69
 (9–16 September). A keyword shows its first two labels, then a `+N` chip when
-there are more. Average rank is the mean of the days that have a rank, to one
-decimal, or an em dash when every day is empty.
+there are more. Average rank is the mean of the days in the current window
+that have a rank, to one decimal, or an em dash when every day is empty.
 
 The Position legend runs from 1 to 100+. Hovering it opens a popup titled
 "Definition: Amazon position", with ticks at 1, 5, 15, 40, 70, and 100+. The
@@ -74,6 +81,7 @@ this visit.
 
 | Control | What it does |
 | ------- | ------------ |
+| Date field | Switches the window: Last 7d, Last 2w, or Last 3w. The day columns, merged runs, averages, and event bars follow that window. |
 | Keyword checkbox | Selects that row. A bar then shows the count, Select all, and Deselect all. |
 | Global events / Keywords | Collapses that group. Both start open. |
 | `skin care` | The only keyword with sub-rows. Expanding it shows PPC Sales, Brand Analytics, SQP Market share (with a % suffix), and an Amazon's Choice bar from 10–17 September. |
@@ -82,16 +90,16 @@ this visit.
 | Create | Needs a name and a range. An empty label uses the name. Colors are purple, azure, amber, teal, and rose. The new event is added at the top of the list. |
 | Escape | Closes the drawer and clears the highlighted days. |
 
-A new event and the theme live in memory for this visit. Reloading brings back
-the two seeded events and the light theme. Nothing is stored, and there is no
-server.
+A new event, the time window, and the theme live in memory for this visit.
+Reloading brings back the two seeded events, the three-week window, and the
+light theme. Nothing is stored, and there is no server.
 
 ## On screen only
 
 These are visible and do not change the keywords, the ranks, or the events:
 
 - The top-bar Search field, including the ⌘K chip painted on it, and Search keywords
-- The product, location, and date fields
+- The product and location fields
 - Position type, which only updates its own label (Organic, Sponsored, or Side-by-side)
 - The D / W marks. D is shown highlighted. Neither letter is a button.
 - Export and Fullscreen
@@ -133,4 +141,4 @@ The footer of the app reads "MIT licensed · Clickable prototype" and credits
 
 ## Live demo
 
-Try it at [denys-keyword-tracker.vercel.app](https://denys-keyword-tracker.vercel.app).
+Try it at [keyword-tracker-nine.vercel.app](https://keyword-tracker-nine.vercel.app).
