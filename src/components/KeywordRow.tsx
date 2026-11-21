@@ -4,8 +4,10 @@ import { displayIndex, recentValues, type DayColumn } from '../lib/dates.ts'
 import { stickyClass } from '../lib/columns.ts'
 import type { Span } from '../lib/highlight.ts'
 import { displayOrder, toRuns } from '../lib/runs.ts'
+import { useRollFrom } from '../lib/useRollFrom.ts'
 import { cn, iconStroke } from '../lib/cn.ts'
 import { EventRow } from './EventRow.tsx'
+import { RollingNumber } from './RollingNumber.tsx'
 import { SeriesCells } from './RankCell.tsx'
 
 type KeywordRowProps = {
@@ -21,6 +23,30 @@ type KeywordRowProps = {
 
 function Chip({ children }: { children: string }) {
   return <span className="inline-flex h-5 items-center rounded-chip bg-bg-tertiary px-1 text-cell text-fg-secondary">{children}</span>
+}
+
+function ValueSeries({
+  values,
+  suffix,
+  displayAxis,
+  span,
+}: {
+  values: readonly number[]
+  suffix?: string
+  displayAxis: readonly DayColumn[]
+  span: Span | null
+}) {
+  const rollFrom = useRollFrom(values, displayAxis.map((day) => day.iso))
+  return (
+    <SeriesCells
+      runs={toRuns(displayOrder(recentValues(values, displayAxis.length)))}
+      span={span}
+      displayAxis={displayAxis}
+      colorize={false}
+      suffix={suffix}
+      rollFrom={rollFrom}
+    />
+  )
 }
 
 export function KeywordRow({
@@ -42,6 +68,9 @@ export function KeywordRow({
   const sticky = { scrolled, tone: 'primary' as const }
   const shown = keyword.labels.slice(0, 2)
   const extra = keyword.labels.length - shown.length
+  const isos = displayAxis.map((day) => day.iso)
+  const rollFrom = useRollFrom(keyword.ranks, isos)
+  const average = averageRank(ranks)
 
   return (
     <>
@@ -93,13 +122,15 @@ export function KeywordRow({
           </div>
         </td>
         <td className={cn(stickyClass(3, sticky), 'h-9 border-b border-border-primary px-2 text-right tabular-nums text-fg-primary')}>
-          {averageRank(ranks)}
+          <span className="sr-only">{average}</span>
+          <RollingNumber value={average} />
         </td>
         <SeriesCells
           runs={runs}
           span={span}
           displayAxis={displayAxis}
           colorize
+          rollFrom={rollFrom}
           collapseLeft={keyword.id === 'shampoo' && collapseLeft >= 0 ? collapseLeft : undefined}
           collapseRight={keyword.id === 'shampoo' && collapseRight >= 0 ? collapseRight : undefined}
         />
@@ -136,13 +167,7 @@ export function KeywordRow({
                   <Chip>{child.chip}</Chip>
                 </td>
                 <td className={cn(stickyClass(3, sticky), 'h-9 border-b border-border-primary')} />
-                <SeriesCells
-                  runs={toRuns(displayOrder(recentValues(child.values, days)))}
-                  span={span}
-                  displayAxis={displayAxis}
-                  colorize={false}
-                  suffix={child.suffix}
-                />
+                <ValueSeries values={child.values} suffix={child.suffix} displayAxis={displayAxis} span={span} />
               </tr>
             ),
           )

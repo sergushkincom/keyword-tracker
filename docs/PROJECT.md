@@ -24,7 +24,7 @@ The date field switches the window:
 | Last 2w | 11–24 September |
 | Last 3w | 4–24 September, the default |
 
-The day columns, merged runs, averages, and event bars follow that window. An event that falls outside the window becomes an empty hatch. The choice, a new event, and the theme last for this visit. Reloading restores the three-week window, the two seeded events, and the light theme.
+The day columns, merged runs, averages, and event bars follow that window. A number that changes rolls like a counter: up when it rises, down when it falls. A number that was already on screen and did not change stays put. Reduced motion snaps. An event that falls outside the window becomes an empty hatch. The choice, a new event, and the theme last for this visit. Reloading restores the three-week window, the two seeded events, and the light theme.
 
 The README still and GIF are that screen. `docs/hero.png` is the default window. `docs/period.gif` is the date field switching it. Both sit at the top of the README and link to the live demo. `scripts/capture.mjs` records them from the running app with Playwright and ffmpeg. It is not an npm script and it is not in CI.
 
@@ -48,7 +48,7 @@ npm run lint
 npm run build
 ```
 
-`npm test` runs the unit tests in `src/lib/*.test.ts` (merged runs, the six rank bands, and the time windows). `npm run lint` runs oxlint. CI installs with `npm ci` on Node 22, then runs typecheck, lint, test, and the production build.
+`npm test` runs the unit tests in `src/lib/*.test.ts` (merged runs, the six rank bands, the time windows, and the rank roll). `npm run lint` runs oxlint. CI installs with `npm ci` on Node 22, then runs typecheck, lint, test, and the production build.
 
 ## Status
 
@@ -57,6 +57,7 @@ Shipped and live at [https://keyword-tracker-nine.vercel.app](https://keyword-tr
 - The merged-cell rank table, event bars, and the new-event drawer.
 - Light and dark for this visit.
 - The date field switches the window.
+- Rank numbers roll when that window changes.
 - README still and GIF of that table.
 - Unit tests and a CI gate for typecheck, lint, test, and the production build.
 
@@ -67,8 +68,6 @@ These controls are visible and do not change the keywords, the ranks, or the eve
 The legend popup's timeframe line still reads "Timeframe: 1 week". It does not follow the date field.
 
 The page `<head>` still names a second demo host. The README uses [keyword-tracker-nine.vercel.app](https://keyword-tracker-nine.vercel.app) only. That split is open issue #9.
-
-When the window changes, the rank numbers jump. They do not roll. That idea is open issue #12.
 
 ## Rules
 

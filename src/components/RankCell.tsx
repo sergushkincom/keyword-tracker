@@ -2,8 +2,10 @@ import { rankColor, rankText } from '../lib/rankColor.ts'
 import { COLUMN_WASH, washFrame, type Span } from '../lib/highlight.ts'
 import { displaySpan, type DayColumn } from '../lib/dates.ts'
 import { formatSeriesValue, seriesRunLabel } from '../lib/rankLabel.ts'
+import { formatRollBody } from '../lib/roll.ts'
 import type { Run } from '../lib/runs.ts'
 import { cn } from '../lib/cn.ts'
+import { RollingNumber } from './RollingNumber.tsx'
 
 export function Wash({ startIndex, length, span }: { startIndex: number; length: number; span: Span | null }) {
   const frame = washFrame(startIndex, length, span)
@@ -26,6 +28,7 @@ type SeriesCellsProps = {
   collapseLeft?: number
   collapseRight?: number
   animate?: boolean
+  rollFrom?: (run: Run) => number | null
 }
 
 export function SeriesCells({
@@ -37,6 +40,7 @@ export function SeriesCells({
   collapseLeft,
   collapseRight,
   animate,
+  rollFrom,
 }: SeriesCellsProps) {
   return (
     <>
@@ -54,6 +58,9 @@ export function SeriesCells({
           { value: run.value, length: run.length, startIso, endIso },
           { kind: colorize ? 'rank' : 'value', suffix },
         )
+        const body = run.value === null ? '' : formatSeriesValue(run.value)
+        const source = run.value === null ? null : (rollFrom?.(run) ?? null)
+        const from = source !== null && body !== '' && source !== run.value ? formatRollBody(source, body) : undefined
         return (
           <td
             key={run.startIndex}
@@ -76,7 +83,7 @@ export function SeriesCells({
                 animate && 'rise-in',
               )}
             >
-              {run.value === null ? '' : formatSeriesValue(run.value, suffix)}
+              {body === '' ? null : <RollingNumber value={body} from={from} suffix={suffix} />}
             </div>
           </td>
         )
