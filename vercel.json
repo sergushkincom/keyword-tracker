@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "keyword-tracker-nine.vercel.app" }],
+      "destination": "https://denys-keyword-tracker.vercel.app/:path*",
+      "permanent": true
+    }
+  ]
+}
