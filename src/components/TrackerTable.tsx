@@ -2,9 +2,9 @@ import { ArrowDown, ChevronRight } from 'lucide-react'
 import { useLayoutEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
 import { KEYWORDS } from '../data/keywords.ts'
 import type { TrackerEvent } from '../data/events.ts'
-import { AXIS, DISPLAY_AXIS } from '../lib/dates.ts'
+import { type DayColumn } from '../lib/dates.ts'
 import { columnDayLabel, trackerTableLabel } from '../lib/rankLabel.ts'
-import { CHECK_W, DATE_ORIGIN, DAY_COUNT, DAY_W, LABEL_W, NAME_W, RANK_W, TABLE_WIDTH, stickyClass } from '../lib/columns.ts'
+import { CHECK_W, DATE_ORIGIN, DAY_W, LABEL_W, NAME_W, RANK_W, stickyClass, tableWidth } from '../lib/columns.ts'
 import { COLUMN_WASH, type Span } from '../lib/highlight.ts'
 import { cn, iconStroke } from '../lib/cn.ts'
 import { EventRow } from './EventRow.tsx'
@@ -14,6 +14,7 @@ import { Wash } from './RankCell.tsx'
 
 type TrackerTableProps = {
   events: TrackerEvent[]
+  displayAxis: readonly DayColumn[]
   drawerOpen: boolean
   span: Span | null
   onSpanChange: (span: Span) => void
@@ -34,6 +35,7 @@ function legendBackground(span: Span | null): CSSProperties | undefined {
 
 export function TrackerTable({
   events,
+  displayAxis,
   drawerOpen,
   span,
   onSpanChange,
@@ -65,7 +67,7 @@ export function TrackerTable({
     if (!element) return 0
     const x = clientX - element.getBoundingClientRect().left + element.scrollLeft
     const raw = Math.floor((x - DATE_ORIGIN) / DAY_W)
-    return Math.min(DAY_COUNT - 1, Math.max(0, raw))
+    return Math.min(displayAxis.length - 1, Math.max(0, raw))
   }
 
   function onHeaderPointerDown(event: ReactPointerEvent<HTMLTableCellElement>, index: number) {
@@ -100,16 +102,19 @@ export function TrackerTable({
       onScroll={(event) => setScrolled(event.currentTarget.scrollLeft > 0)}
     >
       <table
-        aria-label={trackerTableLabel(AXIS[0].iso, AXIS[AXIS.length - 1].iso)}
+        aria-label={trackerTableLabel(
+          displayAxis[displayAxis.length - 1]?.iso ?? '',
+          displayAxis[0]?.iso ?? '',
+        )}
         className="border-separate border-spacing-0 text-cell"
-        style={{ width: TABLE_WIDTH, minWidth: TABLE_WIDTH }}
+        style={{ width: tableWidth(displayAxis.length), minWidth: tableWidth(displayAxis.length) }}
       >
         <colgroup>
           <col style={{ width: CHECK_W }} />
           <col style={{ width: NAME_W }} />
           <col style={{ width: LABEL_W }} />
           <col style={{ width: RANK_W }} />
-          {DISPLAY_AXIS.map((day) => (
+          {displayAxis.map((day) => (
             <col key={day.iso} style={{ width: DAY_W }} />
           ))}
         </colgroup>
@@ -131,7 +136,7 @@ export function TrackerTable({
                 <ArrowDown size={16} strokeWidth={iconStroke} className="text-fg-tertiary" />
               </span>
             </th>
-            {DISPLAY_AXIS.map((day, index) => {
+            {displayAxis.map((day, index) => {
               const selectedColumn = span !== null && index >= span.start && index <= span.end
               return (
                 <th
@@ -162,12 +167,14 @@ export function TrackerTable({
             open={eventsOpen}
             scrolled={scrolled}
             span={span}
+            displayAxis={displayAxis}
             onToggle={() => setEventsOpen((open) => !open)}
           />
           {eventsOpen
             ? events.map((event) => (
                 <EventRow
                   key={event.id}
+                  displayAxis={displayAxis}
                   name={event.name}
                   label={event.label}
                   color={event.color}
@@ -181,7 +188,7 @@ export function TrackerTable({
               ))
             : null}
           <tr>
-            <td colSpan={4 + DAY_COUNT} className="border-b border-border-primary bg-bg-primary p-1" style={legendBackground(span)}>
+            <td colSpan={4 + displayAxis.length} className="border-b border-border-primary bg-bg-primary p-1" style={legendBackground(span)}>
               <div className="sticky left-0 flex justify-end" style={{ width: viewportWidth || undefined }}>
                 <Legend />
               </div>
@@ -192,6 +199,7 @@ export function TrackerTable({
             open={keywordsOpen}
             scrolled={scrolled}
             span={span}
+            displayAxis={displayAxis}
             onToggle={() => setKeywordsOpen((open) => !open)}
           />
           {keywordsOpen
@@ -199,6 +207,7 @@ export function TrackerTable({
                 <KeywordRow
                   key={keyword.id}
                   keyword={keyword}
+                  displayAxis={displayAxis}
                   selected={selected.has(keyword.id)}
                   expanded={expanded.has(keyword.id)}
                   scrolled={scrolled}
@@ -219,12 +228,14 @@ function GroupHeader({
   open,
   scrolled,
   span,
+  displayAxis,
   onToggle,
 }: {
   label: string
   open: boolean
   scrolled: boolean
   span: Span | null
+  displayAxis: readonly DayColumn[]
   onToggle: () => void
 }) {
   const sticky = { scrolled, tone: 'secondary' as const }
@@ -239,7 +250,7 @@ function GroupHeader({
       </th>
       <td className={cn(stickyClass(2, sticky), 'h-9 border-b border-border-primary')} />
       <td className={cn(stickyClass(3, sticky), 'h-9 border-b border-border-primary')} />
-      {DISPLAY_AXIS.map((day, index) => (
+      {displayAxis.map((day, index) => (
         <td key={day.iso} className="relative h-9 border-b border-border-primary bg-bg-secondary">
           <Wash startIndex={index} length={1} span={span} />
         </td>

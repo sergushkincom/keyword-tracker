@@ -10,6 +10,7 @@ import { TopBar } from './components/TopBar.tsx'
 import { TrackerTable } from './components/TrackerTable.tsx'
 import { KEYWORDS } from './data/keywords.ts'
 import { SEEDED_EVENTS, type EventColor, type TrackerEvent } from './data/events.ts'
+import { axisForDays, displayAxisFor, periodById, type PeriodId } from './lib/dates.ts'
 import type { Span } from './lib/highlight.ts'
 
 type ThemeName = 'light' | 'dark'
@@ -22,6 +23,8 @@ export default function App() {
   const [span, setSpan] = useState<Span | null>(null)
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set())
   const [enteredId, setEnteredId] = useState<string | null>(null)
+  const [periodId, setPeriodId] = useState<PeriodId>('21d')
+  const displayAxis = displayAxisFor(axisForDays(periodById(periodId).days))
   const drawerOpenRef = useRef(false)
   drawerOpenRef.current = drawerOpen
 
@@ -89,11 +92,18 @@ export default function App() {
         <div className="flex min-w-0 flex-1 flex-col">
           <TopBar theme={theme} onToggleTheme={() => setTheme((current) => (current === 'light' ? 'dark' : 'light'))} />
           <main className="flex min-h-0 flex-1 flex-col gap-2 px-2 py-2">
-            <FilterRow />
+            <FilterRow
+              periodId={periodId}
+              onPeriodChange={(id) => {
+                setPeriodId(id)
+                setSpan(null)
+              }}
+            />
             <ProductCard />
             <TableToolbar drawerOpen={drawerOpen} onNewEvent={openDrawer} />
             <TrackerTable
               events={events}
+              displayAxis={displayAxis}
               drawerOpen={drawerOpen}
               span={drawerOpen ? span : null}
               onSpanChange={setSpan}
@@ -106,7 +116,9 @@ export default function App() {
         </div>
       </div>
       <SiteFooter />
-      {drawerOpen ? <NewEventDrawer key={drawerKey} span={span} onClose={closeDrawer} onCreate={createEvent} /> : null}
+      {drawerOpen ? (
+        <NewEventDrawer key={drawerKey} span={span} displayAxis={displayAxis} onClose={closeDrawer} onCreate={createEvent} />
+      ) : null}
       <SelectionBar
         count={selected.size}
         onSelectAll={() => setSelected(new Set(KEYWORDS.map((keyword) => keyword.id)))}

@@ -1,5 +1,5 @@
 import type { EventColor } from '../data/events.ts'
-import { barSegments, displaySpan, formatRange } from '../lib/dates.ts'
+import { barSegments, displaySpan, formatRange, type DayColumn } from '../lib/dates.ts'
 import { eventSpanLabel, spanWithDuration } from '../lib/rankLabel.ts'
 import { stickyClass } from '../lib/columns.ts'
 import type { Span } from '../lib/highlight.ts'
@@ -11,6 +11,7 @@ type EventRowProps = {
   name: string
   label: string
   color: EventColor
+  displayAxis: readonly DayColumn[]
   startDate: string
   endDate: string
   span: Span | null
@@ -25,6 +26,7 @@ export function EventRow({
   name,
   label,
   color,
+  displayAxis,
   startDate,
   endDate,
   span,
@@ -34,7 +36,7 @@ export function EventRow({
   indent,
   chip,
 }: EventRowProps) {
-  const segments = barSegments(startDate, endDate)
+  const segments = barSegments(startDate, endDate, displayAxis)
   const range = formatRange(startDate, endDate)
   const sticky = { scrolled, tone: 'primary' as const }
 
@@ -53,7 +55,7 @@ export function EventRow({
       </td>
       <td className={cn(stickyClass(3, sticky), 'h-9 border-b border-border-primary')} />
       {segments.map((segment) => {
-        const { startIso, endIso } = displaySpan(segment.startIndex, segment.length)
+        const { startIso, endIso } = displaySpan(segment.startIndex, segment.length, displayAxis)
         return segment.kind === 'bar' ? (
           <td key={segment.startIndex} colSpan={segment.length} className="relative h-9 border-b border-border-primary p-1">
             <span className="sr-only">{eventSpanLabel(name, startIso, endIso, segment.length)}</span>

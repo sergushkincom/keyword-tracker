@@ -9,6 +9,10 @@ export const DATE_ORIGIN = CHECK_W + NAME_W + LABEL_W + RANK_W
 export const DAY_COUNT = 21
 export const TABLE_WIDTH = DATE_ORIGIN + DAY_COUNT * DAY_W
 
+export function tableWidth(dayCount: number): number {
+  return DATE_ORIGIN + dayCount * DAY_W
+}
+
 const LEFT = [0, CHECK_W, CHECK_W + NAME_W, DATE_ORIGIN - RANK_W] as const
 
 export function stickyClass(

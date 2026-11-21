@@ -1,21 +1,22 @@
 import { useState } from 'react'
 import { EVENT_COLORS, type EventColor } from '../data/events.ts'
-import { DISPLAY_AXIS, formatRange } from '../lib/dates.ts'
+import { formatRange, type DayColumn } from '../lib/dates.ts'
 import type { Span } from '../lib/highlight.ts'
 import { cn } from '../lib/cn.ts'
 
 type NewEventDrawerProps = {
   span: Span | null
+  displayAxis: readonly DayColumn[]
   onClose: () => void
   onCreate: (event: { name: string; label: string; color: EventColor; startDate: string; endDate: string }) => void
 }
 
-export function NewEventDrawer({ span, onClose, onCreate }: NewEventDrawerProps) {
+export function NewEventDrawer({ span, displayAxis, onClose, onCreate }: NewEventDrawerProps) {
   const [name, setName] = useState('')
   const [label, setLabel] = useState('')
   const [color, setColor] = useState<EventColor>('purple')
-  const start = span ? DISPLAY_AXIS[span.start] : undefined
-  const end = span ? DISPLAY_AXIS[span.end] : undefined
+  const start = span ? displayAxis[span.start] : undefined
+  const end = span ? displayAxis[span.end] : undefined
   const range = start && end ? formatRange(start.iso, end.iso) : 'Select on the timeline'
   const canCreate = name.trim().length > 0 && Boolean(start && end)
 
