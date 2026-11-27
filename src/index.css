@@ -289,13 +289,25 @@ body {
   animation: rise-in 200ms cubic-bezier(.22, 1, .36, 1);
 }
 
-@keyframes selection-in {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
+/* Slides 6px. @starting-style is the entrance; data-state="closed" is the exit. */
+.selection-bar {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 200ms cubic-bezier(.22, 1, .36, 1),
+    transform 200ms cubic-bezier(.22, 1, .36, 1);
 }
 
-.selection-in {
-  animation: selection-in 200ms cubic-bezier(.22, 1, .36, 1);
+@starting-style {
+  .selection-bar {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+.selection-bar[data-state='closed'] {
+  opacity: 0;
+  transform: translateY(6px);
 }
 
 /* Soft slot while a digit is traveling. The resting digit is unmasked. */
@@ -310,5 +322,9 @@ body {
 
   .roll-veil {
     mask-image: none;
+  }
+
+  .selection-bar {
+    transition: none;
   }
 }

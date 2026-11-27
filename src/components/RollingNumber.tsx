@@ -1,23 +1,10 @@
-import { useLayoutEffect, useState, useSyncExternalStore, type CSSProperties } from 'react'
+import { useLayoutEffect, useState, type CSSProperties } from 'react'
 import { cn } from '../lib/cn.ts'
 import { planRoll, type RollColumn } from '../lib/roll.ts'
+import { useReducedMotion } from '../lib/useReducedMotion.ts'
 
 const STEP = 18
 const EASE = 'cubic-bezier(.22, 1, .36, 1)'
-
-function subscribeReduced(onChange: () => void) {
-  const query = window.matchMedia('(prefers-reduced-motion: reduce)')
-  query.addEventListener('change', onChange)
-  return () => query.removeEventListener('change', onChange)
-}
-
-function reducedNow() {
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
-}
-
-function useReducedMotion() {
-  return useSyncExternalStore(subscribeReduced, reducedNow, () => false)
-}
 
 type RollingNumberProps = {
   value: string
