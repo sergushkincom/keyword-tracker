@@ -24,7 +24,7 @@ The date field switches the window:
 | Last 2w | 11–24 September |
 | Last 3w | 4–24 September, the default |
 
-The day columns, merged runs, averages, and event bars follow that window. A number that changes rolls like a counter: up when it rises, down when it falls. A number that was already on screen and did not change stays put. Reduced motion snaps. An event that falls outside the window becomes an empty hatch. The choice, a new event, and the theme last for this visit. Reloading restores the three-week window, the two seeded events, and the light theme.
+The day columns, merged runs, averages, and event bars follow that window. A number that changes rolls like a counter: up when it rises, down when it falls. A number that was already on screen and did not change stays put. Reduced motion snaps. The selection count rolls the same way, and clearing the selection slides the bar down and fades it out. An event that falls outside the window becomes an empty hatch. The choice, a new event, and the theme last for this visit. Reloading restores the three-week window, the two seeded events, and the light theme.
 
 The README still and GIF are that screen. `docs/hero.png` is the default window. `docs/period.gif` is the date field switching it. Both sit at the top of the README and link to the live demo. `scripts/capture.mjs` records them from the running app with Playwright and ffmpeg. It is not an npm script and it is not in CI.
 
@@ -58,6 +58,7 @@ Shipped and live at [https://denys-keyword-tracker.vercel.app](https://denys-key
 - Light and dark for this visit.
 - The date field switches the window.
 - Rank numbers roll when that window changes.
+- The selection count rolls, and the bar slides away when the selection is cleared.
 - README still and GIF of that table.
 - Unit tests and a CI gate for typecheck, lint, test, and the production build.
 - One demo address, denys-keyword-tracker.vercel.app, in the README and the page `<head>`. `vercel.json` sends the old keyword-tracker-nine.vercel.app host there with a permanent redirect.
